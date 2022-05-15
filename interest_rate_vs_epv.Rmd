@@ -1,0 +1,223 @@
+---
+title: "Sensivity Analysis - Interest Rate vs EPV"
+author: "Sivaram Ainkaran"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tinytex)
+library(tidyverse)
+
+
+```
+
+```{r, echo=FALSE}
+Data <- read.table('mortality_table.txt', dec='.',sep='\t', header=TRUE)
+#read the l_x table into a usable table in R
+Data
+```
+
+```{r, echo=FALSE}
+interest <- seq(0,0.5,0.01) #Vector of length 50 for interest rate
+a_0 <- c()  #Empty vector a_0 values are added to for each interest rate
+a_30 <- c() #Empty vector a_30 values are added to for each interest rate
+a_60 <- c() #Empty vector a_60 values are added to for each interest rate
+A_0 <- c()  #Empty vector A_0 values are added to for each interest rate
+A_30 <- c() #Empty vector A_30 values are added to for each interest rate
+A_60 <- c() #Empty vector A_60 values are added to for each interest rate
+```
+
+
+```{r, echo=FALSE}
+#'a_0'
+g=1                     #age of participant + 1
+for (i in 0:50){        #for loop to generate a_0 for each interest rate
+  v <- 1/(1+(i/100))    #generate v to input to each a_0
+  ax = c()              #create empty vector used to calculate a_0
+  for (k in 1:104){     #for loop to generate a_0 for given interest rate
+    lx <- Data$lx[g]    #value of l_x at age x ie. g-1 from given Data
+    lx1 <- Data$lx[k+g] #value of l_(x+k) at age x ie. g-1 from given Data
+    if (k+g<=104){      #if statement to ensure no errors when k+g>104 when calculating kpx
+      kpx <- lx1/lx     #value of kpx is l_(x+k)/l_x
+    }else{
+      kpx <- 0          #if k+g>104, kpx=0, to prevent any errors
+    }
+  a_x <- (v^k)*kpx      
+  ax[k] <- a_x          #store values in ax vector
+  }
+  a0 <- sum(ax)         #sum values in ax vector to find a_0 for given i
+a_0[i+1] <- a0          #store each of these into the a_0 vector 
+}
+a_0 <- a_0/a_0[1]       #standardise each a0 value in the a_0 vector
+
+
+
+
+#'A_0'
+for (i in 0:50){         #for loop to generate A_0 for each interest rate
+  v <- 1/(1+(i/100))     #generate v to input to each A_0
+  ax = c()               #create empty vector used to calculate A_0
+  for (k in 0:104){      #for loop to generate A_0 for given interest rate
+    lx <- Data$lx[g]     #value of l_x at age x ie. g-1 from given Data
+    lx1 <- Data$lx[k+g]  #value of l_(x+k) at age x ie. g-1 from given Data
+    lqx <- Data$lx[k+g+1]#value of l_(x+k+1) at age x ie. g-1 from given Data
+    if (k+g<=104){       #if statement to ensure no errors when k+g>104 when calculating kpx
+      kpx <- lx1/lx      #value of kpx is l_(x+k)/l_x
+    }else{
+      kpx <- 0           #if k+g>104, kpx=0, to prevent any errors
+    }
+    if (k+g+1<=104){     #if statement to ensure no errors when k+g+1>104 when calculating (k+1)px
+      kqx <- lqx/lx      #value of (k+1)px is l_(x+k+1)/l_x
+    }else{
+      kqx <- 0           #if k+g+1>104, (k+1)px=0, to prevent any errors
+    }
+  k_qx <- kpx-kqx        #kqx is kpx-(k+1)px
+  a_x <- (v^(k+1))*k_qx  
+  ax[k+1] <- a_x         #store values in ax vector
+  }
+  A0 <- sum(ax)          #sum values in ax vector to find A_0 for given i
+A_0[i+1] <- A0           #store each of these into the A_0 vector 
+}
+A_0 <- A_0/A_0[1]        #standardise each a0 value in the A_0 vector
+```
+
+```{r, echo=FALSE}
+#comments are similar for all ages since procedures are the same
+#'a_30'
+g=31
+for (i in 0:50){
+  v <- 1/(1+(i/100))
+  ax = c()
+  for (k in 1:104){
+    lx <- Data$lx[g]
+    lx1 <- Data$lx[k+g]
+    if (k+g<=104){
+      kpx <- lx1/lx
+    }else{
+      kpx <- 0
+    }
+  a_x <- (v^k)*kpx 
+  ax[k] <- a_x
+  }
+  a30 <- sum(ax)
+a_30[i+1] <- a30
+}
+a_30 <- a_30/a_30[1]
+
+
+
+
+#'A_30'
+for (i in 0:50){
+  v <- 1/(1+(i/100))
+  ax = c()
+  for (k in 0:104){
+    lx <- Data$lx[g]
+    lx1 <- Data$lx[k+g]
+    lqx <- Data$lx[k+g+1]
+    if (k+g<=104){
+      kpx <- lx1/lx
+    }else{
+      kpx <- 0
+    }
+    if (k+g+1<=104){
+      kqx <- lqx/lx
+    }else{
+      kqx <- 0
+    }
+  k_qx <- kpx-kqx
+  a_x <- (v^(k+1))*k_qx 
+  ax[k+1] <- a_x
+  }
+  A30 <- sum(ax)
+A_30[i+1] <- A30
+}
+A_30 <- A_30/A_30[1]
+
+```
+
+
+
+```{r, echo=FALSE}
+#'a_60'
+g=61
+for (i in 0:50){
+  v <- 1/(1+(i/100))
+  ax = c()
+  for (k in 1:104){
+    lx <- Data$lx[g]
+    lx1 <- Data$lx[k+g]
+    if (k+g<=104){
+      kpx <- lx1/lx
+    }else{
+      kpx <- 0
+    }
+  a_x <- (v^k)*kpx 
+  ax[k] <- a_x
+  }
+  a60 <- sum(ax)
+a_60[i+1] <- a60
+}
+a_60 <- a_60/a_60[1]
+
+
+
+
+#'A_60'
+for (i in 0:50){
+  v <- 1/(1+(i/100))
+  ax = c()
+  for (k in 0:104){
+    lx <- Data$lx[g]
+    lx1 <- Data$lx[k+g]
+    lqx <- Data$lx[k+g+1]
+    if (k+g<=104){
+      kpx <- lx1/lx
+    }else{
+      kpx <- 0
+    }
+    if (k+g+1<=104){
+      kqx <- lqx/lx
+    }else{
+      kqx <- 0
+    }
+  k_qx <- kpx-kqx
+  a_x <- (v^(k+1))*k_qx 
+  ax[k+1] <- a_x
+  }
+  A60 <- sum(ax)
+A_60[i+1] <- A60
+}
+A_60 <- A_60/A_60[1]
+
+```
+
+
+```{r, echo=FALSE}
+
+par(bg='white',fg='black', font.axis=2)
+df <- data.frame(interest,a_0,a_30,a_60,A_0,A_30,A_60)
+write.table(df,'29741823_analysis_output.txt',sep='\t',dec='.',row.names=FALSE)
+plot(a_0,type="l", xlab="Interest rate (%)",col.axis='black',col.lab='black',ylab="Standardised EPV",main="Interest rate's effect on EPV")
+lines(a_30,type="l",col="blue")
+lines(a_60,type="l",col="green")
+lines(A_0,type="l",col="orange")
+lines(A_30,type="l",col="purple")
+lines(A_60,type="l",col="black")
+legend("topright",legend=c("Annuity_0","Annuity_30","Annuity_60","Assurance_0","Assurance_30","Assurance_60"), col=c("red","blue","green","orange","purple","black"),lty=1,cex=0.8,text.font=4,text.col="black",bg="aliceblue")
+```
+
+
+The whole life annuity product, when compared with the whole life assurance product tends to have a higher standardised EPV (Expected Present Value) over all interest rates at each respective age ie. at x = 0, 30, 60.
+This is due to $_{k}p_{x}$ having a higher value than $_{k|}q_{x}$ at all interest rates and ages since $_{k|}q_{x} =\ _{k}p_{x} -\ _{k+1}p_{x}$.
+
+
+We can see that as age(x) decreases, both the $a_{x}$ and $A_{x}$ curves tend to drop more quickly and seem to plateau. This is due to the fact that at lower ages there are much more values used to calculate $a_{x}$ and $A_{x}$ since there are more ages between them and the maximum age. This means for the low interest rates all these values will contribute towards computing $a_{x}$ and $A_{x}$ but as $i$ increases and $k$ increases the discount rate will tend towards 0 meaning values as k increases make less and less of a contribution in calculating $a_{x}$ and $A_{x}$ and causes a rapid dip in these values as age increases.
+
+The product standardised expected present values, $A_{0}, A_{30}\ and \ a_{0}$ all are very sensitive to interest rate changes and plateau very quickly, dropping below a standardised EPV of 0.2 by interest rates of 4%, 7% and 9% respectively.The standardised expected present values $a_{30}, A_{60}\ and \ a_{60}$ on the other hand are not as sensitive and do not plateau as fast, dropping below a standardised EPV of 0.2 by interest rates of 16%, 25% and 43% respectively. 
+
+
+
